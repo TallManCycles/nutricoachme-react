@@ -7,35 +7,37 @@ const Account = ({ session }) => {
   const [website, setWebsite] = useState(null)
   const [avatar_url, setAvatarUrl] = useState(null)
 
-  useEffect(() => {
-    const getProfile = async () => {
-        try {
-          setLoading(true)
-          const { user } = session
-    
-          let { data, error, status } = await supabase
-            .from('profiles')
-            .select(`username, website, avatar_url`)
-            .eq('id', user.id)
-            .single()
-    
-          if (error && status !== 406) {
-            throw error
-          }
-    
-          if (data) {
-            setUsername(data.username)
-            setWebsite(data.website)
-            setAvatarUrl(data.avatar_url)
-          }
-        } catch (error) {
-          alert(error.message)
-        } finally {
-          setLoading(false)
-        }
-      }
-  }, [session])
 
+  const getProfile = async () => {
+    try {
+      setLoading(true)
+      const { user } = session
+
+      let { data, error, status } = await supabase
+        .from('profiles')
+        .select(`username, website, avatar_url`)
+        .eq('id', user.id)
+        .single()
+
+      if (error && status !== 406) {
+        alert(error.message)
+      }
+
+      if (data) {
+        setUsername(data.username)
+        setWebsite(data.website)
+        setAvatarUrl(data.avatar_url)
+      }
+    } catch (error) {
+      alert(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    getProfile()
+  }, [session])
 
   const updateProfile = async (e) => {
     e.preventDefault()
@@ -55,7 +57,7 @@ const Account = ({ session }) => {
       let { error } = await supabase.from('profiles').upsert(updates)
 
       if (error) {
-        throw error
+        alert(error.message)
       }
     } catch (error) {
       alert(error.message)

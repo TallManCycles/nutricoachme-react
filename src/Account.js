@@ -8,35 +8,34 @@ const Account = ({ session }) => {
   const [avatar_url, setAvatarUrl] = useState(null)
 
   useEffect(() => {
-    getProfile()
+    const getProfile = async () => {
+        try {
+          setLoading(true)
+          const { user } = session
+    
+          let { data, error, status } = await supabase
+            .from('profiles')
+            .select(`username, website, avatar_url`)
+            .eq('id', user.id)
+            .single()
+    
+          if (error && status !== 406) {
+            throw error
+          }
+    
+          if (data) {
+            setUsername(data.username)
+            setWebsite(data.website)
+            setAvatarUrl(data.avatar_url)
+          }
+        } catch (error) {
+          alert(error.message)
+        } finally {
+          setLoading(false)
+        }
+      }
   }, [session])
 
-  const getProfile = async () => {
-    try {
-      setLoading(true)
-      const { user } = session
-
-      let { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', user.id)
-        .single()
-
-      if (error && status !== 406) {
-        throw error
-      }
-
-      if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
-      }
-    } catch (error) {
-      alert(error.message)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const updateProfile = async (e) => {
     e.preventDefault()
